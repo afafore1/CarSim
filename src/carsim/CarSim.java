@@ -23,6 +23,8 @@ public class CarSim extends javax.swing.JFrame {
     volatile boolean simulate = false;
     Transformation camTranform;
     ArrayList<Renderable> renderableList = new ArrayList<>();
+    ArrayList<Obstacle> obstacleList = new ArrayList<>();
+    Sensor sensor1, sensor2, sensor3;
     
     public CarSim() {
         initComponents();
@@ -33,7 +35,27 @@ public class CarSim extends javax.swing.JFrame {
         car.setLocation(new Vector2D(140, -140));
         car.setRotation(Math.toRadians(0));
         renderableList.add(car);
+        
+        Obstacle o1 = new Obstacle(400, -200, 200, -500);
+        Obstacle o2 = new Obstacle(400, -400, 100, -400);
+        Obstacle o3 = new Obstacle(450, -250, 250, -550);
+        renderableList.add(o1);
+        renderableList.add(o2);
+        renderableList.add(o3);
+        obstacleList.add(o1);
+        obstacleList.add(o2);
+        obstacleList.add(o3);
 
+        sensor1 = new Sensor(-8, 18, Math.toRadians(30), 200, car.carTransform);
+        sensor2 = new Sensor(0, 20, 0, 200, car.carTransform);
+        sensor3 = new Sensor(8, 18, Math.toRadians(-30), 200, car.carTransform);
+        sensor1.obstacleList = obstacleList;
+        sensor2.obstacleList = obstacleList;
+        sensor3.obstacleList = obstacleList;
+        renderableList.add(sensor1);
+        renderableList.add(sensor2);
+        renderableList.add(sensor3);
+        
         Thread simulationThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -59,6 +81,21 @@ public class CarSim extends javax.swing.JFrame {
     // Frame update function.
     // Put your per frame logic here.
     void update() {
+        // Your logic here:
+        
+        // My logic :P
+        jProgressBar1.setValue(
+                (int) ((sensor1.getDistance() / sensor1.maxDistance)
+                        * jProgressBar1.getMaximum()));
+        jProgressBar2.setValue(
+                (int) ((sensor2.getDistance() / sensor2.maxDistance)
+                        * jProgressBar2.getMaximum()));
+        jProgressBar3.setValue(
+                (int) ((sensor3.getDistance() / sensor3.maxDistance)
+                        * jProgressBar3.getMaximum()));
+        
+        // End of your logic.
+        // Draw calls and updates.
         bufferGraphics.setColor(CLEAR_COLOR);
         bufferGraphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
         for (Renderable renderable : renderableList) {
@@ -84,6 +121,9 @@ public class CarSim extends javax.swing.JFrame {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
+        jProgressBar1 = new javax.swing.JProgressBar();
+        jProgressBar2 = new javax.swing.JProgressBar();
+        jProgressBar3 = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         addKeyListener(new java.awt.event.KeyAdapter() {
@@ -111,7 +151,7 @@ public class CarSim extends javax.swing.JFrame {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 529, Short.MAX_VALUE)
+            .addGap(0, 469, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -120,7 +160,11 @@ public class CarSim extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jProgressBar3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jProgressBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jProgressBar1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -128,6 +172,12 @@ public class CarSim extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jProgressBar2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jProgressBar3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -211,5 +261,8 @@ public class CarSim extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JProgressBar jProgressBar2;
+    private javax.swing.JProgressBar jProgressBar3;
     // End of variables declaration//GEN-END:variables
 }

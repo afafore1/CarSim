@@ -22,14 +22,13 @@ public class Car implements Renderable{
     double speed = 0;
     double steeringAngle = 0;
     double steeringSpeed; // Radians per frame.
+    Transformation carTransform = new Transformation();
     
     private Vector2D[] corners = new Vector2D[4];
-    private Vector2D forwardVector, rightVector, center;
     private Color CAR_COLOR = Color.BLACK;
     private Color TIRE_COLOR = Color.BLUE;
-    private Color FORWARD_COLOR = Color.MAGENTA;
     private Color STEER_COLOR = Color.PINK;
-    private double FORWARD_VECTOR_LENGTH = 20; // 20 pixels
+    private double STEERING_VECTOR_LENGTH = 20; // 20 pixels
     
     public Car(double maxSpeed, double maxSteerAngle, double steeringSpeed,
             Vector2D size, double tireDistance, double brakingDeceleration,
@@ -41,9 +40,6 @@ public class Car implements Renderable{
         this.size = size.clone();
         this.brakingDeceleration = brakingDeceleration;
         this.friction = friction;
-        forwardVector = new Vector2D();
-        rightVector = new Vector2D();
-        center = new Vector2D();
 
         frontTire = new Vector2D();
         rearTire = new Vector2D(0, -tireDistance);
@@ -56,24 +52,24 @@ public class Car implements Renderable{
     
     public void setLocation(Vector2D location) {
         frontTire.moveTo(location).
-                add(Vector2D.multiply(tireDistance / 2, forwardVector));
+                add(Vector2D.multiply(tireDistance / 2, carTransform.yVector));
         rearTire.moveTo(location).
-                add(Vector2D.multiply(-tireDistance / 2, forwardVector));
+                add(Vector2D.multiply(-tireDistance / 2, carTransform.yVector));
         recalculateVectors();
     }
     
     public void rotate(double theta) {
-        forwardVector.rotate(theta);
-        setLocation(center);
+        carTransform.yVector.rotate(theta);
+        setLocation(carTransform.origin);
         // Since setLocation depends on the forward vector, that line 
         // effectively keep the car in the same position and rotate it.
     }
     
     public void setRotation(double theta) {
-        forwardVector.x = 1;
-        forwardVector.y = 0;
-        forwardVector.rotate(theta);
-        setLocation(center); // Same idea.
+        carTransform.yVector.x = 1;
+        carTransform.yVector.y = 0;
+        carTransform.yVector.rotate(theta);
+        setLocation(carTransform.origin); // Same idea.
     }
     
     public void update() {
@@ -86,14 +82,14 @@ public class Car implements Renderable{
             speed = linearApproach(speed, 0, brakingDeceleration);
         }
         
-        double carAngle = Math.atan2(forwardVector.y, forwardVector.x);
+        double carAngle = Math.atan2(carTransform.yVector.y, carTransform.yVector.x);
         Vector2D movement = Vector2D.rotate(new Vector2D(speed, 0),
                 carAngle + steeringAngle);
         frontTire.add(movement);
         // Temporarily calculate this to make rear tire follow.
-        forwardVector.moveTo(frontTire).subtract(rearTire).normalize();
+        carTransform.yVector.moveTo(frontTire).subtract(rearTire).normalize();
         rearTire.moveTo(frontTire)
-                .subtract(Vector2D.multiply(tireDistance, forwardVector));
+                .subtract(Vector2D.multiply(tireDistance, carTransform.yVector));
         recalculateVectors();
     }
     
@@ -115,19 +111,12 @@ public class Car implements Renderable{
         Point rearPoint = camTransform.transform(rearTire).toPoint();
         g.drawLine(frontPoint.x, -frontPoint.y, rearPoint.x, -rearPoint.y);
         
-        // Draw forward vector.
-        g.setColor(FORWARD_COLOR);
-        Point forward = camTransform.transform(
-                Vector2D.add(frontTire,
-                        Vector2D.multiply(FORWARD_VECTOR_LENGTH,
-                                forwardVector))).toPoint();
-        g.drawLine(frontPoint.x, -frontPoint.y, forward.x, -forward.y);
-        
+        // Draw steering vector.
         g.setColor(STEER_COLOR);
         Point steer = camTransform.transform(
                 Vector2D.add(frontTire,
-                        Vector2D.multiply(FORWARD_VECTOR_LENGTH,
-                                Vector2D.rotate(forwardVector, steeringAngle))))
+                        Vector2D.multiply(STEERING_VECTOR_LENGTH,
+                                Vector2D.rotate(carTransform.yVector, steeringAngle))))
                 .toPoint();
         g.drawLine(frontPoint.x, -frontPoint.y, steer.x, -steer.y);
     }
@@ -145,16 +134,16 @@ public class Car implements Renderable{
     }
     
     private void recalculateVectors() {
-        forwardVector.moveTo(frontTire).subtract(rearTire).normalize();
-        rightVector.moveTo(forwardVector).transpose();
-        center.moveTo(rearTire).add(Vector2D.multiply(tireDistance / 2,
-                forwardVector));
+        carTransform.yVector.moveTo(frontTire).subtract(rearTire).normalize();
+        carTransform.xVector.moveTo(carTransform.yVector).transpose();
+        carTransform.origin.moveTo(rearTire).add(Vector2D.multiply(tireDistance / 2,
+                carTransform.yVector));
         
-        Vector2D halfForward = Vector2D.multiply(size.y / 2, forwardVector);
-        Vector2D halfRight = Vector2D.multiply(size.x / 2, rightVector);
-        //System.out.println(forwardVector + ", " + rightVector + ", " + center);
+        Vector2D halfForward = Vector2D.multiply(size.y / 2, carTransform.yVector);
+        Vector2D halfRight = Vector2D.multiply(size.x / 2, carTransform.xVector);
+        //System.out.println(carTransform.yVector + ", " + carTransform.xVector + ", " + carTransform.origin);
         for (int i = 0; i < 4; i++) {
-            corners[i].moveTo(center);
+            corners[i].moveTo(carTransform.origin);
             // corner 0 and 1 are at the front.
             // Just some bit shifting tricks cuz I'm lazy.
             corners[i].add((i >> 1) == 0 ? halfForward : halfForward.negated());

@@ -75,6 +75,12 @@ public class Vector2D {
         return this;
     }
     
+    public Vector2D transform(Transformation t) {
+        double tempX = x, tempY = y;
+        return moveTo(t.origin).add(Vector2D.multiply(tempX, t.xVector)).add(
+                        Vector2D.multiply(tempY, t.yVector));
+    }
+    
     static Vector2D cross(Vector2D v1, Vector2D v2) {
         return new Vector2D(v1.x * v2.y, v1.y * v2.x);
     }

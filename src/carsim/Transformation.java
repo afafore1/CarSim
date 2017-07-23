@@ -1,9 +1,9 @@
 package carsim;
 
 public class Transformation {
-    private Vector2D xVector;
-    private Vector2D yVector;
-    private Vector2D origin;
+    Vector2D xVector;
+    Vector2D yVector;
+    Vector2D origin;
     
     public Transformation() {reset();}
     

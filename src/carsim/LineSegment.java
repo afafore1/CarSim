@@ -9,6 +9,22 @@ public class LineSegment {
     }
     
     public LineSegment(Vector2D v1, Vector2D v2) {
-        
+        this.v1 = v1.clone();
+        this.v2 = v2.clone();
+    }
+    
+    public Vector2D intersect(LineSegment other) {
+        Vector2D intersection = 
+                new Line(v1, v2).intersect(new Line(other.v1, other.v2));
+        if (intersection != null) {
+            if (Vector2D.dot(Vector2D.subtract(intersection, v1), 
+                    Vector2D.subtract(intersection, v2)) <= 0
+                    && Vector2D.dot(Vector2D.subtract(intersection, other.v1), 
+                    Vector2D.subtract(intersection, other.v2)) <= 0) {
+                // If intersection belongs inside both the segments.
+                return intersection;
+            }
+        }
+        return null;
     }
 }
