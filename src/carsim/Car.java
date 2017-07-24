@@ -3,6 +3,7 @@ package carsim;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
+import java.util.ArrayList;
 
 public class Car implements Renderable{
     
@@ -23,7 +24,8 @@ public class Car implements Renderable{
     double steeringAngle = 0;
     double steeringSpeed; // Radians per frame.
     Transformation carTransform = new Transformation();
-    
+//    ArrayList<Obstacle> obstacleList;
+
     private Vector2D[] corners = new Vector2D[4];
     private Color CAR_COLOR = Color.BLACK;
     private Color TIRE_COLOR = Color.BLUE;
@@ -76,7 +78,7 @@ public class Car implements Renderable{
         steeringAngle = linearApproach(steeringAngle, steeringTarget,
                 steeringSpeed);
         
-        speed = clamp(speed + acceleration, -maxSpeed, maxSpeed);
+        speed = CommonFunctions.clamp(speed + acceleration, -maxSpeed, maxSpeed);
         speed = linearApproach(speed, 0, friction);
         if (brake) { // If braking, previous acceleration is ignored.
             speed = linearApproach(speed, 0, brakingDeceleration);
@@ -154,9 +156,5 @@ public class Car implements Renderable{
                 3   2
             */
         }
-    }
-    
-    private double clamp(double number, double min, double max) {
-        return Math.max(min, Math.min(max, number));
     }
 }

@@ -3,13 +3,16 @@ package carsim;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class CarSim extends javax.swing.JFrame {
-
+    final double ZOOM_SCALE_DELTA = 1.2;
+    final double MIN_ZOOM = 0.08779149519;
+    final double MAX_ZOOM = 17.0859375;
     final double FRAME_RATE = 60;
     final long INTERVAL = (long) (1000 / FRAME_RATE);
     final Color CLEAR_COLOR = Color.WHITE;
@@ -22,8 +25,16 @@ public class CarSim extends javax.swing.JFrame {
     Graphics bufferGraphics;
     volatile boolean simulate = false;
     Transformation camTranform;
+    double scale = 1;
+    int prevX = -1, prevY = -1;
+    boolean mouseDown = false;
+    
+    // Any object that needs to be rendered has to be added to this list.
     ArrayList<Renderable> renderableList = new ArrayList<>();
+    // A list of obstacles to be given to the sensors.
+    // Many sensors can share the same list.
     ArrayList<Obstacle> obstacleList = new ArrayList<>();
+    
     Sensor sensor1, sensor2, sensor3;
     
     public CarSim() {
@@ -137,6 +148,24 @@ public class CarSim extends javax.swing.JFrame {
 
         jPanel1.setBackground(new java.awt.Color(255, 255, 255));
         jPanel1.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+        jPanel1.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
+            public void mouseDragged(java.awt.event.MouseEvent evt) {
+                jPanel1MouseDragged(evt);
+            }
+        });
+        jPanel1.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                jPanel1MouseWheelMoved(evt);
+            }
+        });
+        jPanel1.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                jPanel1MousePressed(evt);
+            }
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                jPanel1MouseReleased(evt);
+            }
+        });
         jPanel1.addComponentListener(new java.awt.event.ComponentAdapter() {
             public void componentResized(java.awt.event.ComponentEvent evt) {
                 jPanel1ComponentResized(evt);
@@ -221,6 +250,45 @@ public class CarSim extends javax.swing.JFrame {
                 break;
         }
     }//GEN-LAST:event_formKeyReleased
+
+    private void jPanel1MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_jPanel1MouseWheelMoved
+        double lastScale = scale;
+        if (evt.getWheelRotation() < 0) {
+            scale *= ZOOM_SCALE_DELTA;
+        } else {
+            scale /= ZOOM_SCALE_DELTA;
+        }
+        scale = CommonFunctions.clamp(scale, MIN_ZOOM, MAX_ZOOM);
+        
+        double deltaScale = scale / lastScale;
+        Vector2D cursor = new Vector2D(evt.getX(), -evt.getY());
+        Vector2D shiftVector = Vector2D.subtract(cursor, camTranform.origin)
+                .multiply(deltaScale);
+        camTranform.origin.moveTo(cursor).subtract(shiftVector);
+        camTranform.setScale(scale);
+    }//GEN-LAST:event_jPanel1MouseWheelMoved
+
+    private void jPanel1MouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MouseDragged
+        if (mouseDown) {
+            camTranform.shift(evt.getX() - prevX, -(evt.getY() - prevY));
+            prevX = evt.getX();
+            prevY = evt.getY();
+        }
+    }//GEN-LAST:event_jPanel1MouseDragged
+
+    private void jPanel1MousePressed(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MousePressed
+        if (evt.getButton() == MouseEvent.BUTTON2) {
+            mouseDown = true;
+            prevX = evt.getX();
+            prevY = evt.getY();
+        }
+    }//GEN-LAST:event_jPanel1MousePressed
+
+    private void jPanel1MouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jPanel1MouseReleased
+        if (evt.getButton() == MouseEvent.BUTTON2) {
+            mouseDown = false;
+        }
+    }//GEN-LAST:event_jPanel1MouseReleased
 
     /**
      * @param args the command line arguments

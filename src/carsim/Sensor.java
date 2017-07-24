@@ -6,16 +6,17 @@ import java.awt.Point;
 import java.util.ArrayList;
 
 public class Sensor implements Renderable {
+
     private final Color SENSOR_COLOR = Color.GRAY;
 
     Vector2D position = new Vector2D(); // Position local to car.
     double angle = 0, maxDistance = 0;
-    
-    ArrayList<Obstacle> obstacleList = new ArrayList<>();
-    
+
+    ArrayList<Obstacle> obstacleList;
+
     private Transformation parent;
     private LineSegment segment = new LineSegment();
-    
+
     public Sensor(Transformation parent) {
         this.parent = parent;
     }
@@ -35,7 +36,7 @@ public class Sensor implements Renderable {
         this.parent = parent;
         this.maxDistance = maxDistance;
     }
-    
+
     public double getDistance() {
         return segment.getLength();
     }
@@ -50,12 +51,14 @@ public class Sensor implements Renderable {
             segment.v1.transform(parent);
             segment.v2.transform(parent);
         }
-        
-        for (Obstacle obstacle : obstacleList) {
-            Vector2D collision = new LineSegment(segment.v1, segment.v2)
-                    .intersect(obstacle.lineSegment);
-            if (collision != null) {
-                segment.v2.moveTo(collision);
+
+        if (obstacleList != null) {
+            for (Obstacle obstacle : obstacleList) {
+                Vector2D collision = new LineSegment(segment.v1, segment.v2)
+                        .intersect(obstacle.lineSegment);
+                if (collision != null) {
+                    segment.v2.moveTo(collision);
+                }
             }
         }
     }
