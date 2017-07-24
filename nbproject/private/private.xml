@@ -6,7 +6,10 @@
             <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/Car.java</file>
             <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/CarSim.java</file>
             <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/Transformation.java</file>
-            <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/Renderable.java</file>
+            <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/Line.java</file>
+            <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/Sensor.java</file>
+            <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/LineSegment.java</file>
+            <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/Obstacle.java</file>
             <file>file:/C:/Users/Jack/OneDrive/Beans/CarSim/src/carsim/Vector2D.java</file>
         </group>
     </open-files>
