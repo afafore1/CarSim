@@ -17,6 +17,11 @@ public class CarSim extends javax.swing.JFrame {
     final long INTERVAL = (long) (1000 / FRAME_RATE);
     final Color CLEAR_COLOR = Color.WHITE;
     final double ACCELERATION = 1;
+    private int SENSOR1DISTANCE;
+    private int SENSOR2DISTANCE;
+    private int SENSOR3DISTANCE;
+
+    
     
     // INTERVAL is what we use to set the simulation time.
     // FRAME_RATE is purely for readability.
@@ -37,6 +42,8 @@ public class CarSim extends javax.swing.JFrame {
     
     Sensor sensor1, sensor2, sensor3;
     
+    Algorithm algorithm;
+    
     public CarSim() {
         initComponents();
         resize();
@@ -47,9 +54,10 @@ public class CarSim extends javax.swing.JFrame {
         car.setRotation(Math.toRadians(0));
         renderableList.add(car);
         
-        Obstacle o1 = new Obstacle(400, -200, 200, -500);
-        Obstacle o2 = new Obstacle(400, -400, 100, -400);
-        Obstacle o3 = new Obstacle(450, -250, 250, -550);
+        //front end, angle right, back end, angle left
+        Obstacle o1 = new Obstacle(1850, -100, 330, -100);
+        Obstacle o2 = new Obstacle(-400, -400, 1450, -350);
+        Obstacle o3 = new Obstacle(1850, -100, 335, -300);
         renderableList.add(o1);
         renderableList.add(o2);
         renderableList.add(o3);
@@ -60,6 +68,9 @@ public class CarSim extends javax.swing.JFrame {
         sensor1 = new Sensor(-8, 18, Math.toRadians(30), 200, car.carTransform);
         sensor2 = new Sensor(0, 20, 0, 200, car.carTransform);
         sensor3 = new Sensor(8, 18, Math.toRadians(-30), 200, car.carTransform);
+        this.SENSOR3DISTANCE = 31;
+        this.SENSOR2DISTANCE = 31;
+        this.SENSOR1DISTANCE = 31;
         sensor1.obstacleList = obstacleList;
         sensor2.obstacleList = obstacleList;
         sensor3.obstacleList = obstacleList;
@@ -87,23 +98,24 @@ public class CarSim extends javax.swing.JFrame {
         
         simulationThread.start();
         simulate = true;
+        algorithm = new Algorithm(this);
     }
 
     // Frame update function.
     // Put your per frame logic here.
     void update() {
         // Your logic here:
-        
+        SENSOR1DISTANCE = (int) ((sensor1.getDistance() / sensor1.maxDistance)
+                        * jProgressBar1.getMaximum());
+        SENSOR2DISTANCE = (int) ((sensor2.getDistance() / sensor2.maxDistance)
+                        * jProgressBar2.getMaximum());
+        SENSOR3DISTANCE = (int) ((sensor3.getDistance() / sensor3.maxDistance)
+                        * jProgressBar3.getMaximum());
         // My logic :P
-        jProgressBar1.setValue(
-                (int) ((sensor1.getDistance() / sensor1.maxDistance)
-                        * jProgressBar1.getMaximum()));
-        jProgressBar2.setValue(
-                (int) ((sensor2.getDistance() / sensor2.maxDistance)
-                        * jProgressBar2.getMaximum()));
-        jProgressBar3.setValue(
-                (int) ((sensor3.getDistance() / sensor3.maxDistance)
-                        * jProgressBar3.getMaximum()));
+        jProgressBar1.setValue(SENSOR1DISTANCE);
+        jProgressBar2.setValue(SENSOR2DISTANCE);
+        
+        jProgressBar3.setValue(SENSOR3DISTANCE);
         
         // End of your logic.
         // Draw calls and updates.
@@ -234,23 +246,87 @@ public class CarSim extends javax.swing.JFrame {
             case KeyEvent.VK_LEFT:
                 car.steeringTarget = car.maxSteerAngle;
                 break;
+                case KeyEvent.VK_S:
+                algorithm.simpleDrive(true);
+                break;
+            case KeyEvent.VK_ENTER:
+                algorithm.simpleDrive(false);
+                break;
         }
     }//GEN-LAST:event_formKeyPressed
 
     private void formKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_formKeyReleased
         switch (evt.getKeyCode()) {
-            case KeyEvent.VK_UP: case KeyEvent.VK_DOWN:
+            case KeyEvent.VK_UP: 
+            case KeyEvent.VK_DOWN:
                 car.acceleration = 0;
                 break;
             case KeyEvent.VK_SPACE:
                 car.brake = false;
                 break;
-            case KeyEvent.VK_RIGHT: case KeyEvent.VK_LEFT:
+            case KeyEvent.VK_RIGHT: 
+            case KeyEvent.VK_LEFT:
                 car.steeringTarget = 0;
                 break;
         }
     }//GEN-LAST:event_formKeyReleased
 
+    public void moveForward() {
+        car.acceleration = ACCELERATION;
+    }
+    
+    public void moveBackward() {
+        car.acceleration = -ACCELERATION;
+    }
+    
+    public void applyBrake(int degree) {
+        try {
+            car.brake = true;
+            Thread.sleep((long)(degree/100));
+            car.steeringTarget = 0;
+            System.out.println("Moving right by "+degree+" degrees");
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CarSim.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        System.out.println("Applying brake by "+degree+" degrees");
+    }
+    
+    public void moveRight(int degree) {
+        try {
+            car.steeringTarget = - car.maxSteerAngle;
+            Thread.sleep((long)(degree/1000));
+            car.steeringTarget = 0;
+            System.out.println("Moving right by "+degree+" degrees");
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CarSim.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public void moveLeft(int degree) {
+        try {
+            car.steeringTarget = car.maxSteerAngle;
+            Thread.sleep((long)(degree/1000));
+            car.steeringTarget = 0;
+            System.out.println("Moving right by "+degree+" degrees");
+        } catch (InterruptedException ex) {
+            Logger.getLogger(CarSim.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        System.out.println("Moving left by "+degree+" degrees");
+    }
+    
+    public int getSENSOR1DISTANCE() {
+        return SENSOR1DISTANCE;
+    }
+    
+    public int getSENSOR2DISTANCE() {
+        return SENSOR2DISTANCE;
+    }
+    
+    public int getSENSOR3DISTANCE() {
+        return SENSOR3DISTANCE;
+    }
+    
     private void jPanel1MouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_jPanel1MouseWheelMoved
         double lastScale = scale;
         if (evt.getWheelRotation() < 0) {
