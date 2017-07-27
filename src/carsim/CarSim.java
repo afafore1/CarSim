@@ -78,6 +78,11 @@ public class CarSim extends javax.swing.JFrame {
         renderableList.add(sensor2);
         renderableList.add(sensor3);
         
+        startDrive();
+        algorithm = new Algorithm(this);
+    }
+
+    public void startDrive() {
         Thread simulationThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -97,10 +102,12 @@ public class CarSim extends javax.swing.JFrame {
         });
         
         simulationThread.start();
-        simulate = true;
-        algorithm = new Algorithm(this);
+        simulate = true;  
     }
-
+    
+    public void stopDrive() {
+        simulate = false;
+    }
     // Frame update function.
     // Put your per frame logic here.
     void update() {
@@ -247,10 +254,7 @@ public class CarSim extends javax.swing.JFrame {
                 car.steeringTarget = car.maxSteerAngle;
                 break;
                 case KeyEvent.VK_S:
-                algorithm.simpleDrive(true);
-                break;
-            case KeyEvent.VK_ENTER:
-                algorithm.simpleDrive(false);
+                algorithm.simpleDrive();
                 break;
         }
     }//GEN-LAST:event_formKeyPressed

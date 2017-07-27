@@ -14,6 +14,7 @@ import java.util.Map;
  */
 public class Algorithm {
 
+    long distanceTraveled = 0;
     enum Action {
         F,
         B,
@@ -26,7 +27,7 @@ public class Algorithm {
         F
     }
 
-    private final int maxDistanceToCrash = 30;
+    private final int maxDistanceToCrash = 60;
     CarSim carsim;
     Map<Enum, Integer> degreeMapper = new HashMap();
 
@@ -34,9 +35,21 @@ public class Algorithm {
         this.carsim = carsim;
     }
 
+    public boolean stuck() {
+        boolean stuck = carsim.getSENSOR1DISTANCE() <= 10 ||
+                carsim.getSENSOR2DISTANCE() <= 10 ||
+                carsim.getSENSOR3DISTANCE() <= 10;
+        System.out.println("Checking stuck, which is "+stuck);
+        return stuck;
+    }
+    
+    public boolean free() {
+        return !stuck();
+    }
+    
     //first create very simple algorithm.. apply degree to which turns are taken ?
-    public void simpleDrive(boolean start) {
-        while (start) {
+    public void simpleDrive() {
+        while (stuck() == false) {
             if (carsim.getSENSOR2DISTANCE() <= maxDistanceToCrash) {
                 if (degreeMapper.get(Action.F) != null) {
                     carsim.applyBrake(degreeMapper.get(Action.F));
@@ -87,11 +100,14 @@ public class Algorithm {
                     } else {
                         degreeMapper.put(Action.F, degreeMapper.get(Action.F) + 1);
                     }
+                    distanceTraveled++;
                 }
             }
-
             //left sensor
             //System.out.println(carsim.getSENSOR1DISTANCE()+"\n"+carsim.getSENSOR2DISTANCE()+"\n"+carsim.getSENSOR3DISTANCE());
         }
+        carsim.stopDrive();
+        System.out.println("Distance traveled is "+distanceTraveled);
+        distanceTraveled = 0;
     }
 }
