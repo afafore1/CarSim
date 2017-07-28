@@ -101,13 +101,16 @@ public class Algorithm {
                         degreeMapper.put(Action.F, degreeMapper.get(Action.F) + 1);
                     }
                     distanceTraveled++;
+                    distanceTraveled /= 1000;
                 }
             }
             //left sensor
             //System.out.println(carsim.getSENSOR1DISTANCE()+"\n"+carsim.getSENSOR2DISTANCE()+"\n"+carsim.getSENSOR3DISTANCE());
         }
-        carsim.stopDrive();
         System.out.println("Distance traveled is "+distanceTraveled);
         distanceTraveled = 0;
+        //remove last car
+        carsim.startDrive();
+        simpleDrive();
     }
 }

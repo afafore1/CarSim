@@ -20,6 +20,7 @@ public class CarSim extends javax.swing.JFrame {
     private int SENSOR1DISTANCE;
     private int SENSOR2DISTANCE;
     private int SENSOR3DISTANCE;
+    private Thread simulationThread;
 
     
     
@@ -35,10 +36,10 @@ public class CarSim extends javax.swing.JFrame {
     boolean mouseDown = false;
     
     // Any object that needs to be rendered has to be added to this list.
-    ArrayList<Renderable> renderableList = new ArrayList<>();
+    ArrayList<Renderable> renderableList;
     // A list of obstacles to be given to the sensors.
     // Many sensors can share the same list.
-    ArrayList<Obstacle> obstacleList = new ArrayList<>();
+    ArrayList<Obstacle> obstacleList;
     
     Sensor sensor1, sensor2, sensor3;
     
@@ -46,18 +47,25 @@ public class CarSim extends javax.swing.JFrame {
     
     public CarSim() {
         initComponents();
+        startDrive();
+        algorithm = new Algorithm(this);
+    }
+
+    public void startDrive() {
         resize();
         camTranform = new Transformation();
         car = new Car(16, Math.toRadians(15), Math.toRadians(2),
                 new Vector2D(40, 70), 50, .5, .06);
         car.setLocation(new Vector2D(140, -140));
         car.setRotation(Math.toRadians(0));
+        renderableList = new ArrayList<>();
+        obstacleList = new ArrayList<>();
         renderableList.add(car);
         
         //front end, angle right, back end, angle left
-        Obstacle o1 = new Obstacle(1850, -100, 330, -100);
-        Obstacle o2 = new Obstacle(-400, -400, 1450, -350);
-        Obstacle o3 = new Obstacle(1850, -100, 335, -300);
+        Obstacle o1 = new Obstacle(1050, -300, 330, -300);
+        Obstacle o2 = new Obstacle(1350, -100, 1330, -600);
+        Obstacle o3 = new Obstacle(1350, -100, 335, -100);
         renderableList.add(o1);
         renderableList.add(o2);
         renderableList.add(o3);
@@ -78,12 +86,7 @@ public class CarSim extends javax.swing.JFrame {
         renderableList.add(sensor2);
         renderableList.add(sensor3);
         
-        startDrive();
-        algorithm = new Algorithm(this);
-    }
-
-    public void startDrive() {
-        Thread simulationThread = new Thread(new Runnable() {
+        simulationThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 while (true) {
@@ -105,9 +108,6 @@ public class CarSim extends javax.swing.JFrame {
         simulate = true;  
     }
     
-    public void stopDrive() {
-        simulate = false;
-    }
     // Frame update function.
     // Put your per frame logic here.
     void update() {
